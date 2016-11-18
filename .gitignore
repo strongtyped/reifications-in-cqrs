@@ -1,6 +1,9 @@
 target
 .idea
 .ensime
+.ensime_cache
+.zshrc
+notes.txt
 *.iml
 .DS_Store
 journal/

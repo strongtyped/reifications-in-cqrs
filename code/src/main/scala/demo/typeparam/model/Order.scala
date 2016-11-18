@@ -1,8 +1,47 @@
-package demo.param.model
+package demo.typeparam.model
 
-import demo.param.Behavior
+import demo.common.{ Actions, Behavior, BehaviorDsl }
 
-case class Order(id: Long, customerNr: String, items: List[Item] = List.empty)
+case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) {
+
+  def orderActions =
+    Order.actions
+      .handleCommand {
+        case AddItem(item)    => List(ItemWasAdded(id, item))
+        case RemoveItem(code) => List(ItemWasRemoved(id, code))
+        case RemoveAllItems =>
+          items.map { item =>
+            ItemWasRemoved(id, item.code)
+          }
+      }
+      .handleEvent {
+        case e: ItemWasAdded   => copy(items = e.item :: items)
+        case e: ItemWasRemoved => copy(items = items.filter(_.code != e.code))
+      }
+
+}
+
+object Order {
+
+  def actions = Actions[Order, OrderCommand, OrderEvent]()
+
+  val constructorActions =
+    actions
+      .handleCommand {
+        case cmd: CreateOrder => List(OrderWasCreated(cmd.id, cmd.customerNr))
+      }
+      .handleEvent {
+        case e: OrderWasCreated => Order(e.orderId, e.customerNr)
+      }
+
+  def behavior =
+    BehaviorDsl
+      .construct(constructorActions)
+      .andThen {
+        case order => order.orderActions
+      }
+
+}
 
 sealed trait OrderCommand
 case class CreateOrder(id: Long, customerNr: String) extends OrderCommand
@@ -15,6 +54,7 @@ case class OrderWasCreated(orderId: Long, customerNr: String) extends OrderEvent
 case class ItemWasAdded(orderId: Long, item: Item) extends OrderEvent
 case class ItemWasRemoved(orderId: Long, code: String) extends OrderEvent
 
+/** Example to illustrate how it would look like to implement a Behavior by hand */
 object OrderBehavior extends Behavior[Order, OrderCommand, OrderEvent] {
 
   def onCommand(cmd: OrderCommand): List[OrderEvent] = {
@@ -52,7 +92,7 @@ object OrderBehavior extends Behavior[Order, OrderCommand, OrderEvent] {
     evt match {
       case e: ItemWasAdded   => order.copy(items = e.item :: order.items)
       case e: ItemWasRemoved => order.copy(items = order.items.filter(_.code != e.code))
-      case _                 => ???
+      case _                 => order
     }
   }
 }

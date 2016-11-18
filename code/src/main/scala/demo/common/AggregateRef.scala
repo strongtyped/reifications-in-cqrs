@@ -1,26 +1,15 @@
-package demo.param
+package demo.common
 
-trait Behavior[A, C, E] {
-
-  def onCommand(cmd: C): List[E]
-
-  def onCommand(agg: A, cmd: C): List[E]
-
-  def onEvent(evt: E): A
-
-  def onEvent(agg: A, evt: E): A
-}
-
-class AggregateRef[A, C, E](behavior: Behavior[A, C, E]) {
+class AggregateRef[A, Cmd, Evt](behavior: Behavior[A, Cmd, Evt]) {
 
   private var aggOpt: Option[A] = None
 
-  private var allEvents: List[E] = List.empty
+  private var allEvents: List[Evt] = List.empty
 
   def getEvents = allEvents.reverse
   def state()   = aggOpt.get
 
-  def ?(cmd: C): List[E] = {
+  def !(cmd: Cmd): List[Evt] = {
 
     // initialize or update aggregate
 
@@ -38,7 +27,7 @@ class AggregateRef[A, C, E](behavior: Behavior[A, C, E]) {
     evts
   }
 
-  private def applyEvents(aggOpt: Option[A], evts: List[E]): Option[A] = {
+  private def applyEvents(aggOpt: Option[A], evts: List[Evt]): Option[A] = {
     (aggOpt, evts) match {
       case (Some(aggregate), _) =>
         val updated =
@@ -50,6 +39,8 @@ class AggregateRef[A, C, E](behavior: Behavior[A, C, E]) {
       case (None, head :: tail) =>
         val agg = Some(behavior.onEvent(head))
         applyEvents(agg, tail)
+
+      case (None, Nil) => aggOpt
     }
   }
 }
