@@ -10,8 +10,8 @@ object MainPathDependentType {
     println("Path Dependent Types")
     println("")
 
-    BackendDependentType.configure(Order)(Order.behavior)
-    val orderRef = BackendDependentType.aggregateRef(Order)
+    BackendDependentType.configure(Order.behavior)
+    val orderRef = BackendDependentType.aggregateRef[Order]
 
     orderRef ! CreateOrder(1, "abc")
     orderRef ! AddItem(Item("001-FG", "product 1", 10))

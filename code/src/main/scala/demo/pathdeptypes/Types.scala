@@ -2,14 +2,12 @@ package demo.pathdeptypes
 
 import demo.common.Actions
 
-trait Types {
+trait Types[A] {
 
-  type Aggregate
   type Command
   type Event
 
-  val actions = Actions[Aggregate, Command, Event]()
+  val actions = Actions[A, Command, Event]()
 
-  val types: this.type = this
-
+  implicit def self: this.type = this
 }

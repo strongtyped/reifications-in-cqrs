@@ -22,15 +22,10 @@ case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) {
 
 }
 
-trait OrderTypes extends Types {
+object Order extends Types[Order] {
 
-  type Aggregate = Order
-  type Command   = OrderCommand
-  type Event     = OrderEvent
-}
-object OrderTypes extends OrderTypes
-
-object Order extends OrderTypes {
+  type Command = OrderCommand
+  type Event   = OrderEvent
 
   val constructorActions =
     actions
