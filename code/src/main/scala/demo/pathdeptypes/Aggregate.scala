@@ -24,13 +24,13 @@ trait Aggregate[Agg] extends Types[Agg] {
   val behavior: Behavior[Agg, Cmd, Evt] =
     first {
       behaviorBuilder
-        .addCmdHandler(createCmdHandler)
-        .addEvtHandler(createEvtHandler)
+        .cmd(createCmdHandler)
+        .evt(createEvtHandler)
     }.andThen {
       agg =>
         behaviorBuilder
-          .addCmdHandler(createdCmdHandler(agg))
-          .addEvtHandler(createdEvtHandler(agg))
+          .cmd(createdCmdHandler(agg))
+          .evt(createdEvtHandler(agg))
     }
 
 }

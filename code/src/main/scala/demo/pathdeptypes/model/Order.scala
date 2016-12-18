@@ -1,6 +1,6 @@
 package demo.pathdeptypes.model
 
-import demo.pathdeptypes.Aggregate
+import demo.pathdeptypes.{Aggregate, BackendDependentType}
 import demo.{CmdHandler, EvtHandler}
 
 
@@ -43,6 +43,10 @@ case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) {
     case e: ItemRemoved => copy(items = items.filter(_.code != e.code))
   }
 
+}
+
+object orderBackendDependentType extends BackendDependentType[Order] {
+  override implicit val aggregate: Order.type = Order
 }
 
 sealed trait OrderCmd

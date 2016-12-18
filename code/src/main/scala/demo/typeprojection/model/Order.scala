@@ -9,7 +9,7 @@ case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) e
 
   def orderActions =
     Order.actions
-      .addCmdHandler {
+      .cmd {
         case AddItem(item) => List(ItemWasAdded(id, item))
         case RemoveItem(code) => List(ItemWasRemoved(id, code))
         case RemoveAllItems =>
@@ -17,7 +17,7 @@ case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) e
             ItemWasRemoved(id, item.code)
           }
       }
-      .addEvtHandler {
+      .evt {
         case e: ItemWasAdded => copy(items = e.item :: items)
         case e: ItemWasRemoved => copy(items = items.filter(_.code != e.code))
       }
@@ -36,10 +36,10 @@ object Order {
 
   val constructorActions =
     actions
-      .addCmdHandler {
+      .cmd {
         case CreateOrder(id, custNum) => List(OrderWasCreated(id, custNum))
       }
-      .addEvtHandler {
+      .evt {
         case OrderWasCreated(id, custNum) => Order(id, custNum)
       }
 

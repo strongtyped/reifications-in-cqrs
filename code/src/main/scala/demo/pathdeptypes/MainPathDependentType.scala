@@ -5,10 +5,6 @@ import demo.pathdeptypes.model._
 
 object MainPathDependentType {
 
-  object orderBackendDependentType extends BackendDependentType[Order] {
-    override implicit val aggregate: Order.type = Order
-  }
-
   def app() = {
 
     println("--------------------------------------------------------")
