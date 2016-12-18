@@ -1,8 +1,6 @@
 package demo.pathdeptypes
 
-import demo.common.BehaviorDsl.first
-import demo.common.{Behavior, BehaviorBuilder}
-import demo.{CmdHandler, EvtHandler}
+import demo.common.Behavior
 
 trait Types[Agg] {
   type Cmd
@@ -10,27 +8,5 @@ trait Types[Agg] {
 }
 
 trait Aggregate[Agg] extends Types[Agg] {
-
-  val createCmdHandler: CmdHandler[Cmd, Evt]
-
-  val createEvtHandler: EvtHandler[Evt, Agg]
-
-  val createdCmdHandler: Agg => CmdHandler[Cmd, Evt]
-
-  val createdEvtHandler: Agg => EvtHandler[Evt, Agg]
-
-  val behaviorBuilder = BehaviorBuilder[Agg, Cmd, Evt]()
-
-  val behavior: Behavior[Agg, Cmd, Evt] =
-    first {
-      behaviorBuilder
-        .cmd(createCmdHandler)
-        .evt(createEvtHandler)
-    }.andThen {
-      agg =>
-        behaviorBuilder
-          .cmd(createdCmdHandler(agg))
-          .evt(createdEvtHandler(agg))
-    }
-
+  def behavior: Behavior[Agg, Cmd, Evt]
 }

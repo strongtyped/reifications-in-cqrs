@@ -1,10 +1,13 @@
 package demo.common
 
+import demo.{CmdHandler, EvtHandler}
+
 trait Behavior[Agg, Cmd, Evt] {
 
-  def onCmd(cmd: Cmd): List[Evt]
-  def onEvt(evt: Evt): Agg
+  val onCreateCmd: CmdHandler[Cmd, Evt]
+  val onCreateEvt: EvtHandler[Evt, Agg]
 
-  def onCmd(agg: Agg, cmd: Cmd): List[Evt]
-  def onEvt(agg: Agg, evt: Evt): Agg
+  val onCreatedCmd: Agg => CmdHandler[Cmd, Evt]
+  val onCreatedEvt: Agg => EvtHandler[Evt, Agg]
+
 }

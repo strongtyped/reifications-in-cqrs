@@ -2,7 +2,6 @@ package demo.pathdeptypes
 
 import demo.pathdeptypes.model._
 
-
 object MainPathDependentType {
 
   def app() = {
@@ -23,7 +22,6 @@ object MainPathDependentType {
     )
 
     orderCmds.foldLeft(orderRef)(_ ! _)
-
 
     print(orderCmds.mkString("Cmd: ", "\nCmd: ", ""))
 
