@@ -2,6 +2,8 @@ package demo.common
 
 import scala.annotation.tailrec
 
+import demo.uncurry
+
 class AggregateRef[Agg, Cmd, Evt](behavior: Behavior[Agg, Cmd, Evt], var aggOpt: Option[Agg] = None, var evts: List[Evt] = List.empty) {
 
   def getEvents: List[Evt] = evts.reverse
@@ -30,7 +32,7 @@ class AggregateRef[Agg, Cmd, Evt](behavior: Behavior[Agg, Cmd, Evt], var aggOpt:
       case (None, head :: tail) =>
         applyEvents(Some(behavior.onCreateEvt(head)), tail)
       case (Some(aggregate), _) =>
-        Some(evts.foldLeft(aggregate)((agg, cmd) => behavior.onCreatedEvt(agg)(cmd)))
+        Some(evts.foldLeft(aggregate)(uncurry(behavior.onCreatedEvt)))
     }
   }
 }
