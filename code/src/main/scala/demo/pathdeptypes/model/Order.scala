@@ -1,57 +1,65 @@
 package demo.pathdeptypes.model
 
-import demo.common.BehaviorDsl
-import demo.pathdeptypes.Types
+import demo.pathdeptypes.Aggregate
+import demo.{CmdHandler, EvtHandler}
+
+
+object Order extends Aggregate[Order] {
+
+  override type Cmd = OrderCmd
+  override type Evt = OrderEvt
+
+  override val createCmdHandler: CmdHandler[Cmd, Evt] = {
+    case CreateOrder(id, custNum) => List(OrderCreated(id, custNum))
+  }
+
+  override val createEvtHandler: EvtHandler[Evt, Order] = {
+    case OrderCreated(id, custNum) => Order(id, custNum)
+  }
+
+  override val createdCmdHandler: Order => CmdHandler[Cmd, Evt] =
+    (order: Order) =>
+      order.createdCmdHandler
+
+  override val createdEvtHandler: Order => EvtHandler[Evt, Order] =
+    (order: Order) =>
+      order.createdEvtHandler
+
+}
 
 case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) {
 
-  def orderActions =
-    Order.actions
-      .handleCommand {
-        case AddItem(item)    => List(ItemWasAdded(id, item))
-        case RemoveItem(code) => List(ItemWasRemoved(id, code))
-        case RemoveAllItems =>
-          items.map { item =>
-            ItemWasRemoved(id, item.code)
-          }
+  private val createdCmdHandler: CmdHandler[Order.Cmd, Order.Evt] = {
+    case AddItem(item) => List(ItemAdded(id, item))
+    case RemoveItem(code) => List(ItemRemoved(id, code))
+    case RemoveAllItems =>
+      items.map { item =>
+        ItemRemoved(id, item.code)
       }
-      .handleEvent {
-        case e: ItemWasAdded   => copy(items = e.item :: items)
-        case e: ItemWasRemoved => copy(items = items.filter(_.code != e.code))
-      }
+  }
+
+  private val createdEvtHandler: EvtHandler[Order.Evt, Order] = {
+    case e: ItemAdded => copy(items = e.item :: items)
+    case e: ItemRemoved => copy(items = items.filter(_.code != e.code))
+  }
 
 }
 
-object Order extends Types[Order] {
+sealed trait OrderCmd
 
-  type Command = OrderCommand
-  type Event   = OrderEvent
+case class CreateOrder(id: Long, customerNr: String) extends OrderCmd
 
-  val constructorActions =
-    actions
-      .handleCommand {
-        case CreateOrder(id, custNum) => List(OrderWasCreated(id, custNum))
-      }
-      .handleEvent {
-        case OrderWasCreated(id, custNum) => Order(id, custNum)
-      }
+case class AddItem(item: Item) extends OrderCmd
 
-  def behavior =
-    BehaviorDsl
-      .construct(constructorActions)
-      .andThen {
-        case order => order.orderActions
-      }
+case class RemoveItem(code: String) extends OrderCmd
 
-}
+case object RemoveAllItems extends OrderCmd
 
-sealed trait OrderCommand
-case class CreateOrder(id: Long, customerNr: String) extends OrderCommand
-case class AddItem(item: Item) extends OrderCommand
-case object RemoveAllItems extends OrderCommand
-case class RemoveItem(code: String) extends OrderCommand
 
-sealed trait OrderEvent
-case class OrderWasCreated(orderId: Long, customerNr: String) extends OrderEvent
-case class ItemWasAdded(orderId: Long, item: Item) extends OrderEvent
-case class ItemWasRemoved(orderId: Long, code: String) extends OrderEvent
+sealed trait OrderEvt
+
+case class OrderCreated(orderId: Long, customerNr: String) extends OrderEvt
+
+case class ItemAdded(orderId: Long, item: Item) extends OrderEvt
+
+case class ItemRemoved(orderId: Long, code: String) extends OrderEvt

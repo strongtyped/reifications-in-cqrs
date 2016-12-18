@@ -1,46 +1,44 @@
 package demo.common
 
-class AggregateRef[A, Cmd, Evt](behavior: Behavior[A, Cmd, Evt]) {
+import scala.annotation.tailrec
 
-  private var aggOpt: Option[A] = None
+class AggregateRef[Agg, Cmd, Evt](behavior: Behavior[Agg, Cmd, Evt]) {
+
+  private var aggOpt: Option[Agg] = None
 
   private var allEvents: List[Evt] = List.empty
 
   def getEvents = allEvents.reverse
-  def state()   = aggOpt.get
 
-  def !(cmd: Cmd): List[Evt] = {
+  def state() = aggOpt.get
+
+  def !(cmd: Cmd): AggregateRef[Agg, Cmd, Evt] = {
 
     // initialize or update aggregate
 
     val evts = aggOpt match {
-      case None      => behavior.onCommand(cmd)
-      case Some(agg) => behavior.onCommand(agg, cmd)
+      case None => behavior.onCmd(cmd)
+      case Some(agg) => behavior.onCmd(agg, cmd)
     }
 
     // apply all events to aggregate
     aggOpt = applyEvents(aggOpt, evts)
 
-    // update aggregate
+    // update events
     allEvents = evts ::: allEvents
 
-    evts
+    this
   }
 
-  private def applyEvents(aggOpt: Option[A], evts: List[Evt]): Option[A] = {
+  @tailrec
+  private def applyEvents(aggOpt: Option[Agg], evts: List[Evt]): Option[Agg] = {
     (aggOpt, evts) match {
-      case (Some(aggregate), _) =>
-        val updated =
-          evts.foldLeft(aggregate) { (agg, evt) =>
-            behavior.onEvent(agg, evt)
-          }
-        Some(updated)
-
+      case (_, Nil) =>
+        aggOpt
       case (None, head :: tail) =>
-        val agg = Some(behavior.onEvent(head))
-        applyEvents(agg, tail)
-
-      case (None, Nil) => aggOpt
+        applyEvents(Some(behavior.onEvt(head)), tail)
+      case (Some(aggregate), _) =>
+        Some(evts.foldLeft(aggregate)(behavior.onEvt))
     }
   }
 }

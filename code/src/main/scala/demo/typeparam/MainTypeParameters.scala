@@ -1,7 +1,6 @@
 package demo.typeparam
 
-import demo.typeparam.model._
-import demo.typeparam.model.Order
+import demo.typeparam.model.{Order, _}
 
 object MainTypeParameters {
 

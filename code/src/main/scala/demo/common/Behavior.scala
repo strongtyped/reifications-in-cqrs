@@ -1,16 +1,12 @@
 package demo.common
 
-import demo.{ ClassTagExtractor, CommandHandler, EventHandler }
+trait Behavior[Agg, Cmd, Evt] {
 
-import scala.reflect.ClassTag
+  def onCmd(cmd: Cmd): List[Evt]
 
-trait Behavior[A, C, E] {
+  def onCmd(agg: Agg, cmd: Cmd): List[Evt]
 
-  def onCommand(cmd: C): List[E]
+  def onEvt(evt: Evt): Agg
 
-  def onCommand(agg: A, cmd: C): List[E]
-
-  def onEvent(evt: E): A
-
-  def onEvent(agg: A, evt: E): A
+  def onEvt(agg: Agg, evt: Evt): Agg
 }

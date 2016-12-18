@@ -1,6 +1,6 @@
 package demo.typeprojection
 
-import demo.common.{ AggregateRef, Behavior }
+import demo.common.{AggregateRef, Behavior}
 
 import scala.collection.concurrent
 import scala.reflect.ClassTag
@@ -11,7 +11,7 @@ object BackendTypeProj {
 
   // format: off
   def configure[A, C, E](behavior: Behavior[A, C, E])
-                               (implicit tag: ClassTag[A]) = {
+                        (implicit tag: ClassTag[A]) = {
 
     aggregateConfigs += (tag -> behavior)
     this
@@ -21,5 +21,6 @@ object BackendTypeProj {
     val behavior = aggregateConfigs(tag).asInstanceOf[Behavior[A, A#Protocol#Command, A#Protocol#Event]]
     new AggregateRef(behavior)
   }
+
   // format: on
 }

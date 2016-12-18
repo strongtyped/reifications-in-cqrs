@@ -1,6 +1,6 @@
 package object demo {
 
-  type CommandHandler[C, E] = PartialFunction[C, List[E]]
-  type EventHandler[E, A]   = PartialFunction[E, A]
+  type CmdHandler[Cmd, Evt] = PartialFunction[Cmd, List[Evt]]
+  type EvtHandler[Evt, Agg] = PartialFunction[Evt, Agg]
 
 }

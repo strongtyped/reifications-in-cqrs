@@ -1,25 +1,24 @@
 package demo.pathdeptypes
 
-import demo.common.{ AggregateRef, Behavior }
+import demo.common.{AggregateRef, Behavior}
 
-import scala.collection.concurrent
+import scala.collection.concurrent.{Map, TrieMap}
 import scala.reflect.ClassTag
 
-object BackendDependentType {
+trait BackendDependentType[A] {
 
-  private var aggregateConfigs: concurrent.Map[ClassTag[_], Behavior[_, _, _]] = concurrent.TrieMap()
+  implicit val aggregate: Aggregate[A]
+
+  private var aggregateConfigs: Map[ClassTag[A], Behavior[A, aggregate.Cmd, aggregate.Evt]] =
+    TrieMap()
 
   // format: off
-  def configure[A, C, E](behavior: Behavior[A, C, E])
-                           (implicit tag: ClassTag[A]) = {
+  def configure(behavior: Behavior[A, aggregate.Cmd, aggregate.Evt])
+               (implicit tag: ClassTag[A]) =
+  aggregateConfigs += (tag -> behavior)
 
-    aggregateConfigs += (tag -> behavior)
-    this
-  }
+  def aggregateRef(implicit tag: ClassTag[A]): AggregateRef[A, aggregate.Cmd, aggregate.Evt] =
+    new AggregateRef(aggregateConfigs(tag))
 
-  def aggregateRef[A](implicit types: Types[A], tag: ClassTag[A]): AggregateRef[A, types.Command, types.Event] = {
-    val behavior = aggregateConfigs(tag).asInstanceOf[Behavior[A, types.Command, types.Event]]
-    new AggregateRef(behavior)
-  }
   // format: on
 }

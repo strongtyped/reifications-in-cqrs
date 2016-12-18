@@ -1,6 +1,6 @@
 package demo.typeparam
 
-import demo.common.{ AggregateRef, Behavior }
+import demo.common.{AggregateRef, Behavior}
 
 import scala.collection.concurrent
 import scala.reflect.ClassTag
