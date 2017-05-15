@@ -27,7 +27,7 @@ object Order extends Types[Order] {
   type Command = OrderCommand
   type Event   = OrderEvent
 
-  val constructorActions =
+  val create =
     actions
       .commandHandler {
         case CreateOrder(id, custNum) => List(OrderWasCreated(id, custNum))
@@ -38,7 +38,9 @@ object Order extends Types[Order] {
 
   def behavior =
     BehaviorDsl
-      .first(constructorActions)
+      .first {
+        create
+      }
       .andThen {
         case order => order.orderActions
       }
@@ -46,12 +48,19 @@ object Order extends Types[Order] {
 }
 
 sealed trait OrderCommand
+
 case class CreateOrder(id: Long, customerNr: String) extends OrderCommand
+
 case class AddItem(item: Item) extends OrderCommand
+
 case object RemoveAllItems extends OrderCommand
+
 case class RemoveItem(code: String) extends OrderCommand
 
 sealed trait OrderEvent
+
 case class OrderWasCreated(orderId: Long, customerNr: String) extends OrderEvent
+
 case class ItemWasAdded(orderId: Long, item: Item) extends OrderEvent
+
 case class ItemWasRemoved(orderId: Long, code: String) extends OrderEvent

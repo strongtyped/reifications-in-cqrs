@@ -1,18 +1,17 @@
-package demo.typeprojection
+package demo.pathdeptypes
 
-import demo.typeprojection.model._
+import demo.pathdeptypes.model._
 
-object MainTypeProjection {
+object MainPathDependentTypes {
 
-  def app() = {
+  def main(args: Array[String]): Unit = {
 
     println("--------------------------------------------------------")
-    println("Type Projections")
+    println("Path Dependent Types")
     println("")
 
-    BackendTypeProj.configure(Order.behavior)
-
-    val orderRef = BackendTypeProj.aggregateRef[Order]
+    BackendDependentType.configure(Order.behavior)
+    val orderRef = BackendDependentType.aggregateRef[Order]
 
     orderRef ! CreateOrder(1, "abc")
     orderRef ! AddItem(Item("001-FG", "product 1", 10))

@@ -1,15 +1,18 @@
 package demo
 
-import demo.pathdeptypes.MainPathDependentType
+import demo.pathdeptypes.MainPathDependentTypes
 import demo.typeparam.MainTypeParameters
-import demo.typeprojection.MainTypeProjection
+import demo.typeprojection.MainTypeProjections
 
-object Main extends App {
+object Main {
 
-  MainTypeParameters.app()
+  def main(args: Array[String]) = {
 
-  MainTypeProjection.app()
+    MainTypeParameters.main(args)
 
-  MainPathDependentType.app()
+    MainTypeProjections.main(args)
 
+    MainPathDependentTypes.main(args)
+
+  }
 }

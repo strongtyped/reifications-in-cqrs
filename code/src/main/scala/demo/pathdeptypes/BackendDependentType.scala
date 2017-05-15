@@ -9,9 +9,7 @@ object BackendDependentType {
 
   private var aggregateConfigs: concurrent.Map[ClassTag[_], Behavior[_, _, _]] = concurrent.TrieMap()
 
-  // format: off
-  def configure[A, C, E](behavior: Behavior[A, C, E])
-                           (implicit tag: ClassTag[A]) = {
+  def configure[A, C, E](behavior: Behavior[A, C, E])(implicit tag: ClassTag[A]) = {
 
     aggregateConfigs += (tag -> behavior)
     this
@@ -21,5 +19,4 @@ object BackendDependentType {
     val behavior = aggregateConfigs(tag).asInstanceOf[Behavior[A, types.Command, types.Event]]
     new AggregateRef(behavior)
   }
-  // format: on
 }

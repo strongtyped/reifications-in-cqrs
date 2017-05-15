@@ -1,11 +1,12 @@
 package demo.typeprojection.model
 
 import demo.common.{ Actions, BehaviorDsl }
-import demo.typeprojection.{ Aggregate, ProtocolLike }
+import demo.typeprojection.Aggregate
 
 case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) extends Aggregate {
 
-  type Protocol = OrderProtocol.type
+  type Command = OrderCommand
+  type Event   = OrderEvent
 
   def orderActions =
     Order.actions
@@ -23,17 +24,12 @@ case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) e
       }
 
 }
-object OrderProtocol extends ProtocolLike {
-
-  type Command = OrderCommand
-  type Event   = OrderEvent
-}
 
 object Order {
 
-  val actions = Actions[Order, OrderProtocol.Command, OrderProtocol.Event]()
+  val actions = Actions[Order, OrderCommand, OrderEvent]()
 
-  val constructorActions =
+  val create =
     actions
       .commandHandler {
         case CreateOrder(id, custNum) => List(OrderWasCreated(id, custNum))
@@ -44,7 +40,9 @@ object Order {
 
   def behavior =
     BehaviorDsl
-      .first(constructorActions)
+      .first {
+        create
+      }
       .andThen {
         case order => order.orderActions
       }

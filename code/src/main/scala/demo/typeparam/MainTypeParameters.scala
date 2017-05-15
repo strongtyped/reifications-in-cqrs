@@ -5,7 +5,8 @@ import demo.typeparam.model.Order
 
 object MainTypeParameters {
 
-  def app() = {
+  def main(args: Array[String]): Unit = {
+
     println("--------------------------------------------------------")
     println("Type Parameters")
     println("")
