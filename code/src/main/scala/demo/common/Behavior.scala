@@ -1,9 +1,5 @@
 package demo.common
 
-import demo.{ ClassTagExtractor, CommandHandler, EventHandler }
-
-import scala.reflect.ClassTag
-
 trait Behavior[A, C, E] {
 
   def onCommand(cmd: C): List[E]

@@ -4,7 +4,7 @@ object BehaviorDsl {
 
   type StateToActions[A, C, E] = PartialFunction[A, Actions[A, C, E]]
 
-  def construct[A, C, E](onCreation: => Actions[A, C, E]) =
+  def first[A, C, E](onCreation: => Actions[A, C, E]) =
     new BehaviorStage(onCreation)
 
   class BehaviorStage[A, C, E](onCreation: => Actions[A, C, E]) {

@@ -9,7 +9,7 @@ case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) e
 
   def orderActions =
     Order.actions
-      .handleCommand {
+      .commandHandler {
         case AddItem(item)    => List(ItemWasAdded(id, item))
         case RemoveItem(code) => List(ItemWasRemoved(id, code))
         case RemoveAllItems =>
@@ -17,7 +17,7 @@ case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) e
             ItemWasRemoved(id, item.code)
           }
       }
-      .handleEvent {
+      .eventHandler {
         case e: ItemWasAdded   => copy(items = e.item :: items)
         case e: ItemWasRemoved => copy(items = items.filter(_.code != e.code))
       }
@@ -35,16 +35,16 @@ object Order {
 
   val constructorActions =
     actions
-      .handleCommand {
+      .commandHandler {
         case CreateOrder(id, custNum) => List(OrderWasCreated(id, custNum))
       }
-      .handleEvent {
+      .eventHandler {
         case OrderWasCreated(id, custNum) => Order(id, custNum)
       }
 
   def behavior =
     BehaviorDsl
-      .construct(constructorActions)
+      .first(constructorActions)
       .andThen {
         case order => order.orderActions
       }
