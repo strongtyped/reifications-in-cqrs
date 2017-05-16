@@ -1,14 +1,11 @@
 package demo.typeprojection
 
+import demo.Show
 import demo.typeprojection.model._
 
 object MainTypeProjections {
 
   def main(args: Array[String]): Unit = {
-
-    println("--------------------------------------------------------")
-    println("Type Projections")
-    println("")
 
     BackendTypeProj.configure(Order.behavior)
 
@@ -20,11 +17,6 @@ object MainTypeProjections {
     orderRef ! AddItem(Item("003-LM", "product 3", 1000))
     orderRef ! RemoveItem("003-LM")
 
-    orderRef.getEvents.foreach { evt =>
-      println(s"Event: $evt")
-    }
-
-    println(orderRef.state())
-    println("--------------------------------------------------------")
+    Show("Type Projections")(orderRef.state(), orderRef.getEvents)
   }
 }

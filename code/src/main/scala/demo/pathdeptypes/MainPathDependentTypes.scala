@@ -1,16 +1,14 @@
 package demo.pathdeptypes
 
+import demo.Show
 import demo.pathdeptypes.model._
 
 object MainPathDependentTypes {
 
   def main(args: Array[String]): Unit = {
 
-    println("--------------------------------------------------------")
-    println("Path Dependent Types")
-    println("")
-
     BackendDependentType.configure(Order.behavior)
+
     val orderRef = BackendDependentType.aggregateRef[Order]
 
     orderRef ! CreateOrder(1, "abc")
@@ -19,11 +17,6 @@ object MainPathDependentTypes {
     orderRef ! AddItem(Item("003-LM", "product 3", 1000))
     orderRef ! RemoveItem("003-LM")
 
-    orderRef.getEvents.foreach { evt =>
-      println(s"Event: $evt")
-    }
-
-    println(orderRef.state())
-    println("--------------------------------------------------------")
+    Show("Path Dependent Types")(orderRef.state(), orderRef.getEvents)
   }
 }

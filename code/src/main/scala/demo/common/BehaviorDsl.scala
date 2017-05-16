@@ -11,10 +11,23 @@ object BehaviorDsl {
 
     def andThen(postCreation: StateToActions[A, C, E]): Behavior[A, C, E] = {
       new Behavior[A, C, E] {
-        def onCommand(cmd: C): List[E]         = onCreation.cmdHandlers(cmd)
-        def onEvent(evt: E): A                 = onCreation.evtHandlers(evt)
-        def onCommand(agg: A, cmd: C): List[E] = postCreation(agg).cmdHandlers(cmd)
-        def onEvent(agg: A, evt: E): A         = postCreation(agg).evtHandlers(evt)
+
+        override def onCommand(aggState: Option[A], cmd: C): List[E] = {
+          aggState
+            .map { agg =>
+              postCreation(agg).cmdHandlers(cmd)
+            }
+            .getOrElse { onCreation.cmdHandlers(cmd) }
+
+        }
+
+        override def onEvent(aggState: Option[A], evt: E): Option[A] = {
+          aggState
+            .map { agg =>
+              postCreation(agg).evtHandlers(evt)
+            }
+            .orElse { Option(onCreation.evtHandlers(evt)) }
+        }
       }
     }
   }

@@ -1,15 +1,11 @@
 package demo.typeparam
 
+import demo.Show
 import demo.typeparam.model._
-import demo.typeparam.model.Order
 
 object MainTypeParameters {
 
   def main(args: Array[String]): Unit = {
-
-    println("--------------------------------------------------------")
-    println("Type Parameters")
-    println("")
 
     BackendParam.configure(Order.behavior)
 
@@ -21,14 +17,7 @@ object MainTypeParameters {
     orderRef ! AddItem(Item("003-LM", "product 3", 1000))
     orderRef ! RemoveItem("003-LM")
 
-    orderRef.getEvents.foreach { evt =>
-      println(s"Event: $evt")
-    }
-
-    println(orderRef.state())
-    println("--------------------------------------------------------")
-    println()
-    println()
+    Show("Type Parameters")(orderRef.state(), orderRef.getEvents)
 
   }
 }

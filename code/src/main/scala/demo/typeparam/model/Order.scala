@@ -59,42 +59,45 @@ case class ItemWasRemoved(orderId: Long, code: String) extends OrderEvent
 /** Example to illustrate how it would look like to implement a Behavior by hand */
 object OrderBehavior extends Behavior[Order, OrderCommand, OrderEvent] {
 
-  def onCommand(cmd: OrderCommand): List[OrderEvent] = {
-    cmd match {
-      case c: CreateOrder => List(OrderWasCreated(c.id, c.customerNr))
-      case _              => List.empty
-    }
-  }
+  override def onCommand(orderState: Option[Order], cmd: OrderCommand): List[OrderEvent] = {
+    (orderState, cmd) match {
 
-  def onCommand(agg: Order, cmd: OrderCommand): List[OrderEvent] = {
-    cmd match {
+      // on creation
+      case (None, c: CreateOrder) => List(OrderWasCreated(c.id, c.customerNr))
 
-      case AddItem(item) => List(ItemWasAdded(agg.id, item))
+      // on update
+      case (Some(agg), AddItem(item))    => List(ItemWasAdded(agg.id, item))
+      case (Some(agg), RemoveItem(code)) => List(ItemWasRemoved(agg.id, code))
 
-      case RemoveItem(code) => List(ItemWasRemoved(agg.id, code))
-
-      case RemoveAllItems =>
+      case (Some(agg), RemoveAllItems) =>
         agg.items.map { item =>
           ItemWasRemoved(agg.id, item.code)
         }
 
       case _ => List.empty
     }
-
   }
 
-  def onEvent(evt: OrderEvent): Order = {
-    evt match {
-      case e: OrderWasCreated => Order(e.orderId, e.customerNr)
-      case _                  => ???
+  override def onEvent(orderState: Option[Order], evt: OrderEvent): Option[Order] = {
+
+    def update(order: Order, event: OrderEvent) = {
+      event match {
+        case e: ItemWasAdded   => order.copy(items = e.item :: order.items)
+        case e: ItemWasRemoved => order.copy(items = order.items.filter(_.code != e.code))
+        case _                 => order
+      }
     }
+
+    orderState
+      .map { order =>
+        update(order, evt)
+      }
+      .orElse {
+        evt match {
+          case e: OrderWasCreated => Some(Order(e.orderId, e.customerNr))
+          case _                  => ???
+        }
+      }
   }
 
-  def onEvent(order: Order, evt: OrderEvent): Order = {
-    evt match {
-      case e: ItemWasAdded   => order.copy(items = e.item :: order.items)
-      case e: ItemWasRemoved => order.copy(items = order.items.filter(_.code != e.code))
-      case _                 => order
-    }
-  }
 }
