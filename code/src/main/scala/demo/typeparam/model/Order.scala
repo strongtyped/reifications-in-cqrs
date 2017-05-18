@@ -23,7 +23,7 @@ case class Order(id: Long, customerNr: String, items: List[Item] = List.empty) {
 
 object Order {
 
-  def actions = Actions[Order, OrderCommand, OrderEvent]()
+  val actions = Actions[Order, OrderCommand, OrderEvent]()
 
   val create =
     actions
@@ -95,7 +95,7 @@ object OrderBehavior extends Behavior[Order, OrderCommand, OrderEvent] {
       .orElse {
         evt match {
           case e: OrderWasCreated => Some(Order(e.orderId, e.customerNr))
-          case _                  => ???
+          case _                  => None
         }
       }
   }
