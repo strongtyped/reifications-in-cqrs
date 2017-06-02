@@ -7,6 +7,12 @@ import scala.reflect.ClassTag
 
 object BackendParam {
 
+
+  def aggregateRef[A, C, E](implicit tag: ClassTag[A]): AggregateRef[A, C, E] = {
+    val behavior = aggregateConfigs(tag).asInstanceOf[Behavior[A, C, E]]
+    new AggregateRef(behavior)
+  }
+
   private var aggregateConfigs: concurrent.Map[ClassTag[_], Behavior[_, _, _]] = concurrent.TrieMap()
 
   def configure[A, C, E](behavior: Behavior[A, C, E])(implicit tag: ClassTag[A]) = {
@@ -14,9 +20,5 @@ object BackendParam {
     this
   }
 
-  def aggregateRef[A, C, E](implicit tag: ClassTag[A]): AggregateRef[A, C, E] = {
-    val behavior = aggregateConfigs(tag).asInstanceOf[Behavior[A, C, E]]
-    new AggregateRef(behavior)
-  }
 
 }
